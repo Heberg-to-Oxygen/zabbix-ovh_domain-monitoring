@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2023-04-28T12:07:01Z</date>
+    <groups>
+        <group>
+            <name>Templates/Vigicorp</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template OVH Domains - Vigicorp</template>
+            <name>Template OVH Domains - Vigicorp</name>
+            <groups>
+                <group>
+                    <name>Templates/Vigicorp</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>DOMAIN: Update Domain</name>
+                    <key>OVHAPI.DOMAIN.SQL[{$APPLICATION_KEY_DOMAIN}, {$APPLICATION_SECRET_DOMAIN}, {$CONSUMER_KEY_DOMAIN}, {$SQL_HOST_DOMAIN}, {$SQL_USER_DOMAIN}, {$SQL_PASSWORD_DOMAIN}, {$SQL_DATABASE_DOMAIN}]</key>
+                    <delay>1d</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>List Domain OVH</name>
+                    <key>OVHAPI.DOMAIN[{$APPLICATION_KEY_DOMAIN}, {$APPLICATION_SECRET_DOMAIN}, {$CONSUMER_KEY_DOMAIN}]</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>DOMAIN: Expire of Domain {#DOMAIN}</name>
+                            <key>OVHAPI.DOMAIN.INFO[{$APPLICATION_KEY_DOMAIN}, {$APPLICATION_SECRET_DOMAIN}, {$CONSUMER_KEY_DOMAIN}, {#DOMAIN}]</key>
+                            <delay>1d</delay>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.Expiration_Day</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;{$DOMAIN_AVERAGE}</expression>
+                                    <name>Domain - {#DOMAIN} expire dans {ITEM.LASTVALUE} jours</name>
+                                    <url>{#DOMAIN}</url>
+                                    <priority>AVERAGE</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Domain - {#DOMAIN} expire dans {ITEM.LASTVALUE} jours</name>
+                                            <expression>{Template OVH Domains - Vigicorp:OVHAPI.DOMAIN.INFO[{$APPLICATION_KEY_DOMAIN}, {$APPLICATION_SECRET_DOMAIN}, {$CONSUMER_KEY_DOMAIN}, {#DOMAIN}].last()}&lt;{$DOMAIN_HIGH}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;{$DOMAIN_HIGH}</expression>
+                                    <name>Domain - {#DOMAIN} expire dans {ITEM.LASTVALUE} jours</name>
+                                    <url>{#DOMAIN}</url>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#DOMAIN}</lld_macro>
+                            <path>$.DOMAIN</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$APPLICATION_KEY_DOMAIN}</macro>
+                    <description>Set OVH application_key</description>
+                </macro>
+                <macro>
+                    <macro>{$APPLICATION_SECRET_DOMAIN}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Set OVH application_secret</description>
+                </macro>
+                <macro>
+                    <macro>{$CONSUMER_KEY_DOMAIN}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Set OVH consumer_key</description>
+                </macro>
+                <macro>
+                    <macro>{$DOMAIN_AVERAGE}</macro>
+                    <value>10</value>
+                </macro>
+                <macro>
+                    <macro>{$DOMAIN_HIGH}</macro>
+                    <value>3</value>
+                </macro>
+                <macro>
+                    <macro>{$SQL_DATABASE_DOMAIN}</macro>
+                    <description>Set DB database name</description>
+                </macro>
+                <macro>
+                    <macro>{$SQL_HOST_DOMAIN}</macro>
+                    <value>localhost</value>
+                    <description>Set DB host</description>
+                </macro>
+                <macro>
+                    <macro>{$SQL_PASSWORD_DOMAIN}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Set DB password</description>
+                </macro>
+                <macro>
+                    <macro>{$SQL_USER_DOMAIN}</macro>
+                    <value>root</value>
+                    <description>Set DB user</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
